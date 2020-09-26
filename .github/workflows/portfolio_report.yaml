@@ -3,8 +3,8 @@ on:
   push:
       branches:
         - master
-  #schedule:
-  #  - cron: '0 21 * * 1-6'
+  schedule:
+   - cron: '0 21 * * 1-6'
 
 jobs:
   Portfolio:
@@ -37,12 +37,17 @@ jobs:
       - name: Run report
         env:
           PORTFOLIO_XLXS: ${{ secrets.PORTFOLIO_XLXS }}
-          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
-          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
         run: |
           data <- lares::stocks_file(Sys.getenv("PORTFOLIO_XLXS"))
           rep  <- lares::stocks_obj(data, quiet = TRUE)
           lares::stocks_report(rep, dir = tempdir())
+        shell: Rscript {0}
+
+      - name: Send report
+        env:
+          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
+          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
+        run: |
           report <- paste0(tempdir(), "/stocksReport.html")
           lares::mailSend(attachment = report, 
             subject = paste("Portfolio Report:", Sys.Date()), 
