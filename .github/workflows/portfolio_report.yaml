@@ -37,20 +37,15 @@ jobs:
       - name: Run report
         env:
           PORTFOLIO_XLXS: ${{ secrets.PORTFOLIO_XLXS }}
+          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
+          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
         run: |
           data <- lares::stocks_file(Sys.getenv("PORTFOLIO_XLXS"))
           rep  <- lares::stocks_obj(data, quiet = TRUE)
           lares::stocks_report(rep, dir = tempdir())
-          Sys.setenv("REPORT_FILE" = paste0(tempdir(), "/stocksReport.html"))
-        shell: Rscript {0}
-
-      - name: Send report
-        env:
-          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
-          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
-        run: |
-          lares::mailSend(attachment = Sys.getenv("REPORT_FILE"), 
-            subject = paste("Portfolio Report:", Sys.Date()), 
+          report <- paste0(tempdir(), "/stocksReport.html")
+          title <- paste("PortfolioReport:", round(rep$portfolio$DifUSD[1]), "@", rep$portfolio$Date[1])
+          lares::mailSend(attachment = report, subject = title, 
             creds = list(
               url = Sys.getenv("MAILGUN_URL"), 
               api = Sys.getenv("MAILGUN_TOKEN")))
