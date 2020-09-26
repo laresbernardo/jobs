@@ -29,6 +29,7 @@ jobs:
         run: |
           install.packages("devtools")
           install.packages("quantmod")
+          install.packages("ggrepel")
           devtools::install_github("laresbernardo/lares")
         shell: Rscript {0}
         
@@ -39,7 +40,7 @@ jobs:
           MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
         run: |
           data <- lares::stocks_file(Sys.getenv("PORTFOLIO_XLXS"))
-          rep  <- lares::stocks_obj(data)
+          rep  <- lares::stocks_obj(data, quiet = TRUE)
           lares::stocks_report(rep, dir = tempdir())
           report <- paste0(tempdir(), "/stocksReport.html")
           lares::mailSend(attachment = report, 
