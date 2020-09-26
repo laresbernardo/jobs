@@ -4,7 +4,7 @@ on:
       branches:
         - master
   schedule:
-   - cron: '0 21 * * 1-6'
+   - cron: '0 21 * * 1-5'
   
 jobs:
   Portfolio:
@@ -43,7 +43,7 @@ jobs:
         run: |
           data <- lares::stocks_file(Sys.getenv("PORTFOLIO_XLXS"))
           rep  <- lares::stocks_obj(data, quiet = TRUE)
-          lares::stocks_report(rep, dir = tempdir())
+          lares::stocks_report(rep, dir = tempdir(), keep_old = FALSE)
           report <- paste0(tempdir(), "/stocksReport.html")
           title <- paste("PortfolioReport:", round(rep$portfolio$DifUSD[1]), "@", rep$portfolio$Date[1])
           lares::mailSend(attachment = report, subject = title, 
