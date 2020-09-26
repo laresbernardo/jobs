@@ -5,8 +5,6 @@ on:
         - master
   schedule:
    - cron: '0 21 * * 1-6'
-env:
-  RENV_PATHS_ROOT: ~/.local/share/renv
   
 jobs:
   Portfolio:
@@ -23,7 +21,7 @@ jobs:
       - name: Cache packages
         uses: actions/cache@v1
         with:
-          path: ${{ env.RENV_PATHS_ROOT }}
+          path: ~/Library/Application Support/renv
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
           restore-keys: |
             ${{ runner.os }}-renv-
