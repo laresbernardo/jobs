@@ -1,4 +1,4 @@
-name: PortfolioReport
+name: Reporting
 on:
   push:
       branches:
@@ -7,7 +7,7 @@ on:
   #  - cron: '0 21 * * 1-6'
 
 jobs:
-  reporting:
+  Portfolio:
     runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -18,12 +18,12 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@master
       
-      # - name: Cache Renv packages
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: $HOME/.local/share/renv
-      #     key: r-${{ hashFiles('renv.lock') }}
-      #     restore-keys: r-
+      - name: Cache Renv packages
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.local/share/renv
+          key: r-${{ hashFiles('renv.lock') }}
+          restore-keys: r-
 
       - name: Install libraries
         run: |
@@ -32,20 +32,15 @@ jobs:
           devtools::install_github("laresbernardo/lares")
         shell: Rscript {0}
         
-      - name: Create report
+      - name: Run report
         env:
           PORTFOLIO_XLXS: ${{ secrets.PORTFOLIO_XLXS }}
+          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
+          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
         run: |
           data <- lares::stocks_file(Sys.getenv("PORTFOLIO_XLXS"))
           rep  <- lares::stocks_obj(data)
           lares::stocks_report(rep, dir = tempdir())
-        shell: Rscript {0}
-        
-    - name: Send report
-        env:
-          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
-          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
-        run: |
           report <- paste0(tempdir(), "/stocksReport.html")
           lares::mailSend(attachment = report, 
             subject = paste("Portfolio Report:", Sys.Date()), 
@@ -53,4 +48,3 @@ jobs:
               url = Sys.getenv("MAILGUN_URL"), 
               api = Sys.getenv("MAILGUN_TOKEN")))
         shell: Rscript {0}
-    
