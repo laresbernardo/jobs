@@ -30,6 +30,7 @@ jobs:
           install.packages("devtools")
           install.packages("quantmod")
           install.packages("ggrepel")
+          install.packages("rmarkdown")
           devtools::install_github("laresbernardo/lares")
         shell: Rscript {0}
         
