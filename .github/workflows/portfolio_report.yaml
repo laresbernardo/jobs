@@ -1,8 +1,5 @@
 name: Reporting
 on:
-  push:
-      branches:
-        - master
   schedule:
    - cron: '0 21 * * 1-5'
   
