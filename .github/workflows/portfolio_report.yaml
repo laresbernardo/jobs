@@ -17,23 +17,37 @@ jobs:
       - uses: r-lib/actions/setup-r@master
 
       - uses: r-lib/actions/setup-pandoc@master
+      
+      - name: Cache Renv packages
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.local/share/renv
+          key: r-${{ hashFiles('renv.lock') }}
+          restore-keys: r-
 
       - name: Install libraries
         run: |
           install.packages("devtools")
+          install.packages("quantmod")
           devtools::install_github("laresbernardo/lares")
         shell: Rscript {0}
         
-      - name: Create and send report
+      - name: Create report
         env:
           PORTFOLIO_XLXS: ${{ secrets.PORTFOLIO_XLXS }}
-          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
-          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
         run: |
           data <- lares::stocks_file(Sys.getenv("PORTFOLIO_XLXS"))
           rep  <- lares::stocks_obj(data)
           lares::stocks_report(rep, dir = tempdir())
           report <- paste0(tempdir(), "/stocksReport.html")
+          print(report)
+        shell: Rscript {0}
+    
+    - name: Send report
+        env:
+          MAILGUN_URL: ${{ secrets.MAILGUN_URL }}
+          MAILGUN_TOKEN: ${{ secrets.MAILGUN_TOKEN }}
+        run: |
           lares::mailSend(attachment = report, 
             subject = paste("Portfolio Report:", Sys.Date()), 
             creds = list(
