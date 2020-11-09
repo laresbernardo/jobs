@@ -44,6 +44,7 @@ jobs:
           report <- paste0(tempdir(), "/stocksReport.html")
           title <- paste("PortfolioReport:", round(rep$portfolio$DifUSD[1]), "@", rep$portfolio$Date[1])
           lares::mailSend(attachment = report, subject = title, 
+            text = 'Sent from Github: "laresbernardo/jobs"',
             creds = list(
               url = Sys.getenv("MAILGUN_URL"), 
               api = Sys.getenv("MAILGUN_TOKEN")))
